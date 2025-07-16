@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Quotex Signal Bot — Azad</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #111;
+      color: #f2f2f2;
+      padding: 30px;
+      text-align: center;
+    }
+    h1 {
+      color: #00ffcc;
+      margin-bottom: 20px;
+    }
+    select, button {
+      margin: 10px;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 6px;
+    }
+    button {
+      background-color: #00ffcc;
+      border: none;
+      cursor: pointer;
+    }
+    #result {
+      margin-top: 30px;
+      font-size: 18px;
+      padding: 20px;
+      background-color: #1e1e1e;
+      border-radius: 8px;
+      display: none;
+    }
+    .signal-up { color: #00ff00; }
+    .signal-down { color: #ff3333; }
+    .signal-wait { color: #cccccc; }
+  </style>
+</head>
+<body>
+
+  <h1>🔮 Quotex OTC Signal Bot — Azad</h1>
+
+  <select id="platform">
+    <option>Quotex</option>
+  </select>
+
+  <select id="market">
+    <option>OTC</option>
+    <option>LIVE</option>
+  </select>
+
+  <select id="pair">
+    <option>USD/JPY</option>
+    <option>CAD/CHF</option>
+    <option>EUR/AUD</option>
+    <option>USD/TRY</option>
+  </select>
+
+  <select id="timeframe">
+    <option>1M</option>
+    <option>5M</option>
+    <option>15M</option>
+    <option>30M</option>
+    <option>1H</option>
+    <option>4H</option>
+  </select>
+
+  <br>
+  <button onclick="generateSignal()">🎯 Generate Signal</button>
+
+  <div id="result"></div>
+
+  <script>
+    async function generateSignal() {
+      const ema8 = 1.234;
+      const ema21 = 1.231;
+      const ema50 = 1.229;
+      const rsi = 28;
+      const stoch_k = 15;
+      const stoch_d = 10;
+      const candle = "bullish engulfing";
+
+      const payload = {
+        ema8, ema21, ema50, rsi, stoch_k, stoch_d, candle
+      };
+
+      const resultBox = document.getElementById("result");
+      resultBox.style.display = "block";
+      resultBox.innerHTML = "⏳ Generating signal...";
+
+      try {
+        const res = await fetch("https://azad.azademtiaz.repl.co/signal", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+
+        let signalClass = "signal-wait";
+        if (data.signal === "CALL") signalClass = "signal-up";
+        if (data.signal === "PUT") signalClass = "signal-down";
+
+        resultBox.innerHTML = `
+          <div class="${signalClass}">
+            <strong>📌 Signal:</strong> ${data.signal}<br>
+            <strong>📊 Confidence:</strong> ${data.confidence}<br>
+            <strong>🧠 Reason:</strong> ${data.reason}
+          </div>
+        `;
+
+      } catch (err) {
+        resultBox.innerHTML = `<span style="color:red;">❌ Error: Could not connect to server.</span>`;
+      }
+    }
+  </script>
+
+</body>
+</html>
